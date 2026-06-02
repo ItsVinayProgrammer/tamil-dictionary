@@ -21,6 +21,7 @@ let loadedCount = 0;
 let hasMoreResults = false;
 let suggestionTimer = null;
 let suggestionController = null;
+const displayedResultKeys = new Set();
 
 function apiUrl(path) {
   return `${API_BASE}${path}`;
@@ -132,24 +133,85 @@ function updateLoadMore() {
   loadMoreButton.hidden = !hasMoreResults;
 }
 
+function compactFileName(fileName) {
+  return String(fileName || "No file").replaceAll("_", " ");
+}
+
+function isMasterFile(item) {
+  return String(item.file_name || "").toLowerCase().includes("master");
+}
+
+function resultKey(item) {
+  return [
+    item.english || "",
+    item.tamil || "",
+    item.subject || "",
+    item.volume || "",
+  ]
+    .map((value) => String(value).trim().toLowerCase())
+    .join("|");
+}
+
+function dedupeResults(items, append = false) {
+  const byKey = new Map();
+
+  items.forEach((item) => {
+    const key = resultKey(item);
+    const existing = byKey.get(key);
+
+    if (!existing || (isMasterFile(existing) && !isMasterFile(item))) {
+      byKey.set(key, item);
+    }
+  });
+
+  return Array.from(byKey.entries())
+    .filter(([key]) => !append || !displayedResultKeys.has(key))
+    .map(([key, item]) => {
+      displayedResultKeys.add(key);
+      return item;
+    });
+}
+
 function resultCard(item, query) {
   const tamil = item.tamil || "-";
   const english = item.english || "-";
+  const subject = item.subject || "No subject";
+  const fileName = compactFileName(item.file_name);
+  const rowNumber = item.row_number || "-";
+  const volume = item.volume || "No volume";
 
   return `
     <article class="result-card">
       <div class="result-main">
-        <p class="tamil-word">${escapeHtml(tamil)}</p>
-        <button class="copy-button" type="button" data-copy="${escapeHtml(tamil)}">
-          Copy Tamil
+        <div class="word-group">
+          <p class="field-label">Tamil</p>
+          <p class="tamil-word">${escapeHtml(tamil)}</p>
+        </div>
+        <button class="copy-button" type="button" data-copy="${escapeHtml(tamil)}" aria-label="Copy Tamil word">
+          Copy
         </button>
       </div>
-      <p class="english-word">${highlightMatch(english, query)}</p>
-      <div class="badge-row">
-        <span class="badge">${escapeHtml(item.subject || "No subject")}</span>
-        <span class="badge">${escapeHtml(item.file_name || "No file")}</span>
-        <span class="badge">Row ${escapeHtml(item.row_number || "-")}</span>
-        <span class="badge">${escapeHtml(item.volume || "No volume")}</span>
+      <div class="english-block">
+        <p class="field-label">English</p>
+        <p class="english-word">${highlightMatch(english, query)}</p>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-item">
+          <span>Subject</span>
+          <strong>${escapeHtml(subject)}</strong>
+        </div>
+        <div class="meta-item">
+          <span>Source</span>
+          <strong>${escapeHtml(fileName)}</strong>
+        </div>
+        <div class="meta-item">
+          <span>Row</span>
+          <strong>${escapeHtml(rowNumber)}</strong>
+        </div>
+        <div class="meta-item">
+          <span>Volume</span>
+          <strong>${escapeHtml(volume)}</strong>
+        </div>
       </div>
     </article>
   `;
@@ -159,18 +221,21 @@ function renderResults(items, query, append = false) {
   if (!append) {
     results.innerHTML = "";
     loadedCount = 0;
+    displayedResultKeys.clear();
   }
 
-  if (items.length === 0 && !append) {
+  const displayItems = dedupeResults(items, append);
+
+  if (displayItems.length === 0 && !append) {
     resultSummary.textContent = `No results found for '${query}'`;
     results.innerHTML = '<div class="empty-state">No matching Tamil words found.</div>';
     updateLoadMore();
     return;
   }
 
-  loadedCount += items.length;
+  loadedCount += displayItems.length;
   resultSummary.textContent = `Showing ${loadedCount} result${loadedCount === 1 ? "" : "s"} for '${query}'`;
-  results.insertAdjacentHTML("beforeend", items.map((item) => resultCard(item, query)).join(""));
+  results.insertAdjacentHTML("beforeend", displayItems.map((item) => resultCard(item, query)).join(""));
   updateLoadMore();
 }
 
@@ -245,6 +310,7 @@ function resetSearch() {
   currentOffset = 0;
   loadedCount = 0;
   hasMoreResults = false;
+  displayedResultKeys.clear();
   resultSummary.textContent = "";
   results.innerHTML = "";
   hideSuggestions();
@@ -327,12 +393,12 @@ async function copyTamil(button) {
     await navigator.clipboard.writeText(text);
     button.textContent = "Copied";
     setTimeout(() => {
-      button.textContent = "Copy Tamil";
+      button.textContent = "Copy";
     }, 1200);
   } catch (error) {
     button.textContent = "Copy failed";
     setTimeout(() => {
-      button.textContent = "Copy Tamil";
+      button.textContent = "Copy";
     }, 1200);
   }
 }

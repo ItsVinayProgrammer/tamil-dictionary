@@ -1,5 +1,5 @@
 // Cloudflare hosts this frontend, while Vercel hosts the FastAPI backend.
-const API_BASE = "https://tamil-dictionary-odv1asyub-itsvinayprogrammers-projects.vercel.app";
+const API_BASE = "https://tamil-dictionary.vercel.app";
 
 const subjectSelect = document.getElementById("subject-select");
 const fileSelect = document.getElementById("file-select");

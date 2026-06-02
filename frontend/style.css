@@ -40,17 +40,32 @@ body {
 
 .title-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 20px;
 }
 
+.brand-lockup {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 18px;
+}
+
+.site-logo {
+  display: block;
+  width: clamp(150px, 20vw, 220px);
+  height: auto;
+  flex: 0 0 auto;
+}
+
 h1 {
   margin: 0;
-  font-size: clamp(1.75rem, 4vw, 2.4rem);
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
   font-weight: 750;
   letter-spacing: 0;
+  line-height: 1.1;
 }
 
 .status-text,
@@ -187,11 +202,24 @@ button:disabled {
   }
 
   .title-row {
-    display: block;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .brand-lockup {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .site-logo {
+    width: min(190px, 70vw);
   }
 
   .status-text {
-    margin-top: 8px;
+    margin-top: 0;
   }
 
   select,

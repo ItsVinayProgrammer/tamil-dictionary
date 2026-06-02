@@ -86,6 +86,7 @@ def search_words(
     subject: str | None = Query(default=None),
     file_name: str | None = Query(default=None),
     limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
 ):
     search_term = q.strip()
     if not search_term:
@@ -118,16 +119,68 @@ def search_words(
             CASE WHEN LOWER(english) = LOWER(%s) THEN 0 ELSE 1 END,
             LOWER(english),
             tamil
-        LIMIT %s
+        LIMIT %s OFFSET %s
     """
-    params.extend([search_term, limit])
+    params.extend([search_term, limit + 1, offset])
 
     with get_connection() as connection:
         with connection.cursor(cursor_factory=RealDictCursor) as cursor:
             cursor.execute(sql, params)
-            results = [dict(row) for row in cursor.fetchall()]
+            rows = [dict(row) for row in cursor.fetchall()]
 
-    return {"count": len(results), "results": results}
+    has_more = len(rows) > limit
+    results = rows[:limit]
+
+    return {
+        "count": len(results),
+        "offset": offset,
+        "limit": limit,
+        "has_more": has_more,
+        "next_offset": offset + len(results),
+        "results": results,
+    }
+
+
+@app.get("/api/suggestions")
+def get_suggestions(
+    q: str = Query(..., min_length=2),
+    subject: str | None = Query(default=None),
+    file_name: str | None = Query(default=None),
+    limit: int = Query(default=8, ge=1, le=20),
+):
+    search_term = q.strip()
+    if len(search_term) < 2:
+        return {"suggestions": []}
+
+    filters = ["LOWER(english) LIKE LOWER(%s) ESCAPE '\\'"]
+    params = [f"%{escape_like(search_term)}%"]
+
+    if subject:
+        filters.append("LOWER(subject) = LOWER(%s)")
+        params.append(subject.strip())
+
+    if file_name:
+        filters.append("LOWER(file_name) = LOWER(%s)")
+        params.append(file_name.strip())
+
+    sql = f"""
+        SELECT english
+        FROM words
+        WHERE {' AND '.join(filters)}
+        GROUP BY english
+        ORDER BY
+            CASE WHEN LOWER(english) LIKE LOWER(%s) ESCAPE '\\' THEN 0 ELSE 1 END,
+            LOWER(english)
+        LIMIT %s
+    """
+    params.extend([f"{escape_like(search_term)}%", limit])
+
+    with get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(sql, params)
+            suggestions = [row[0] for row in cursor.fetchall()]
+
+    return {"suggestions": suggestions}
 
 
 handler = Mangum(app)

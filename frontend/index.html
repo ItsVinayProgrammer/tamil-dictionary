@@ -26,21 +26,32 @@
             <option value="">All Files</option>
           </select>
 
-          <input
-            id="search-input"
-            type="search"
-            placeholder="Type an English word..."
-            autocomplete="off"
-            spellcheck="false"
-          />
+          <div class="search-field">
+            <input
+              id="search-input"
+              type="search"
+              placeholder="Type an English word..."
+              autocomplete="off"
+              spellcheck="false"
+              aria-autocomplete="list"
+              aria-controls="suggestions"
+            />
+            <div id="suggestions" class="suggestions-list" role="listbox"></div>
+          </div>
 
           <button id="search-button" type="button">Search</button>
+          <button id="reset-button" class="secondary-button" type="button">Reset</button>
         </div>
       </section>
 
       <section class="results-section" aria-live="polite">
         <p id="result-summary" class="result-summary"></p>
         <div id="results" class="results-grid"></div>
+        <div class="load-more-row">
+          <button id="load-more-button" class="secondary-button" type="button" hidden>
+            Load more
+          </button>
+        </div>
       </section>
     </main>
 

@@ -8,6 +8,7 @@
   --text: #142033;
   --muted: #64748b;
   --badge: #eff6ff;
+  --soft-accent: #edf4ff;
 }
 
 * {
@@ -81,6 +82,12 @@ h1 {
   gap: 12px;
 }
 
+.search-field {
+  position: relative;
+  flex: 1 1 260px;
+  min-width: 240px;
+}
+
 select,
 input,
 button {
@@ -99,8 +106,9 @@ input {
   padding: 0 14px;
 }
 
-input {
-  flex: 1 1 260px;
+.search-field input {
+  width: 100%;
+  min-width: 0;
 }
 
 select:focus,
@@ -123,9 +131,58 @@ button:hover {
   background: var(--accent-dark);
 }
 
+.secondary-button {
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--text);
+}
+
+.secondary-button:hover {
+  border-color: #b8c7d9;
+  background: #f8fbff;
+}
+
 button:disabled {
   cursor: wait;
   opacity: 0.68;
+}
+
+.suggestions-list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  left: 0;
+  display: none;
+  width: 100%;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 6px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 18px 35px rgba(20, 32, 51, 0.14);
+}
+
+.suggestions-list.is-visible {
+  display: block;
+}
+
+.suggestion-item {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font-weight: 500;
+}
+
+.suggestion-item:hover {
+  background: var(--soft-accent);
+  color: var(--text);
 }
 
 .results-section {
@@ -145,10 +202,17 @@ button:disabled {
 
 .result-card {
   min-width: 0;
-  padding: 18px;
+  padding: 16px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
+}
+
+.result-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .tamil-word {
@@ -159,11 +223,37 @@ button:disabled {
   overflow-wrap: anywhere;
 }
 
+.copy-button {
+  flex: 0 0 auto;
+  min-width: 0;
+  width: auto;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.copy-button:hover {
+  border-color: #b8c7d9;
+  background: var(--soft-accent);
+  color: var(--accent-dark);
+}
+
 .english-word {
-  margin: 0 0 14px;
+  margin: 0 0 12px;
   color: var(--text);
-  font-size: 1rem;
+  font-size: 0.96rem;
   overflow-wrap: anywhere;
+}
+
+mark {
+  padding: 0 2px;
+  border-radius: 4px;
+  background: #dbeafe;
+  color: inherit;
 }
 
 .badge-row {
@@ -174,11 +264,11 @@ button:disabled {
 
 .badge {
   max-width: 100%;
-  padding: 5px 8px;
+  padding: 4px 7px;
   border-radius: 999px;
   background: var(--badge);
   color: #1e3a8a;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   line-height: 1.2;
   overflow-wrap: anywhere;
 }
@@ -189,6 +279,62 @@ button:disabled {
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--muted);
+}
+
+.load-more-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+#load-more-button {
+  width: auto;
+  min-width: 150px;
+}
+
+.skeleton-card {
+  pointer-events: none;
+}
+
+.skeleton-line,
+.skeleton-badges span {
+  display: block;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e7edf5, #f5f8fc, #e7edf5);
+  background-size: 220% 100%;
+  animation: skeleton-pulse 1.15s ease-in-out infinite;
+}
+
+.tamil-skeleton {
+  width: 60%;
+  height: 28px;
+  margin-bottom: 12px;
+}
+
+.english-skeleton {
+  width: 42%;
+  height: 16px;
+  margin-bottom: 16px;
+}
+
+.skeleton-badges {
+  display: flex;
+  gap: 8px;
+}
+
+.skeleton-badges span {
+  width: 74px;
+  height: 22px;
+}
+
+@keyframes skeleton-pulse {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -100% 0;
+  }
 }
 
 @media (max-width: 680px) {
@@ -223,10 +369,19 @@ button:disabled {
   }
 
   select,
-  input,
+  .search-field,
+  .search-field input,
   button {
     width: 100%;
     min-width: 0;
+  }
+
+  .suggestions-list {
+    max-height: 230px;
+  }
+
+  .result-main {
+    align-items: flex-start;
   }
 
   .results-grid {

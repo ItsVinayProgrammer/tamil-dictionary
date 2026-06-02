@@ -40,6 +40,11 @@ def health_check():
     return {"status": "ok", "message": "Tamil Dictionary API running"}
 
 
+@app.get("/")
+def root():
+    return {"status": "ok", "message": "Tamil Dictionary API running", "docs": "/docs"}
+
+
 @app.get("/api/subjects")
 def get_subjects():
     sql = """

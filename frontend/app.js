@@ -1,6 +1,6 @@
 // Change this to your Vercel URL if hosting frontend separately on Cloudflare Pages.
 // Example: const API_BASE = "https://your-project.vercel.app";
-const API_BASE = "";
+const API_BASE = "https://tamil-dictionary.vercel.app/git init";
 
 const subjectSelect = document.getElementById("subject-select");
 const fileSelect = document.getElementById("file-select");

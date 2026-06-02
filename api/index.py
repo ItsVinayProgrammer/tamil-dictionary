@@ -1,4 +1,5 @@
 import os
+from urllib.parse import urlparse
 
 import psycopg2
 from dotenv import load_dotenv
@@ -28,6 +29,7 @@ def get_connection():
     try:
         return psycopg2.connect(database_url)
     except psycopg2.Error as exc:
+        print(f"Database connection failed: {type(exc).__name__}: {exc}")
         raise HTTPException(status_code=500, detail="Database connection failed") from exc
 
 
@@ -77,6 +79,43 @@ def get_files():
             files = [row[0] for row in cursor.fetchall()]
 
     return {"files": files}
+
+
+@app.get("/api/debug/db")
+def debug_database():
+    database_url = os.getenv("DATABASE_URL")
+    if not database_url:
+        return {"configured": False, "ok": False, "error": "DATABASE_URL is not configured"}
+
+    parsed = urlparse(database_url)
+    safe_user = parsed.username or ""
+
+    try:
+        with psycopg2.connect(database_url, connect_timeout=10) as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT COUNT(*) FROM words")
+                count = cursor.fetchone()[0]
+
+        return {
+            "configured": True,
+            "ok": True,
+            "host": parsed.hostname,
+            "port": parsed.port,
+            "database": parsed.path.lstrip("/"),
+            "user": safe_user,
+            "word_count": count,
+        }
+    except psycopg2.Error as exc:
+        return {
+            "configured": True,
+            "ok": False,
+            "host": parsed.hostname,
+            "port": parsed.port,
+            "database": parsed.path.lstrip("/"),
+            "user": safe_user,
+            "error_type": type(exc).__name__,
+            "error": str(exc),
+        }
 
 
 @app.get("/api/search")

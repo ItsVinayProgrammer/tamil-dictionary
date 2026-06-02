@@ -8,3 +8,9 @@ venv/
 .vercel/
 node_modules/
 *.xlsx
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example

@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+preprocessing/excel_files/
+venv/
+.venv/
+.vercel/
+node_modules/
+*.xlsx

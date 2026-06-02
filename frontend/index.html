@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tamil Dictionary</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="search-panel" aria-labelledby="page-title">
+        <div class="title-row">
+          <h1 id="page-title">Tamil Dictionary</h1>
+          <p id="api-status" class="status-text">Loading filters...</p>
+        </div>
+
+        <div class="search-controls">
+          <select id="subject-select" aria-label="Subject">
+            <option value="">All Subjects</option>
+          </select>
+
+          <select id="file-select" aria-label="File">
+            <option value="">All Files</option>
+          </select>
+
+          <input
+            id="search-input"
+            type="search"
+            placeholder="Type an English word..."
+            autocomplete="off"
+            spellcheck="false"
+          />
+
+          <button id="search-button" type="button">Search</button>
+        </div>
+      </section>
+
+      <section class="results-section" aria-live="polite">
+        <p id="result-summary" class="result-summary"></p>
+        <div id="results" class="results-grid"></div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
